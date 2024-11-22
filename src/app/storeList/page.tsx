@@ -1,8 +1,12 @@
 import React from 'react'
+import Navbar from '../components/navbar'
 
 const StoreList = () => {
   return (
-    <div>ini page storeList</div>
+    <div>
+      <Navbar/>
+      ini page storeList
+    </div>
   )
 }
 

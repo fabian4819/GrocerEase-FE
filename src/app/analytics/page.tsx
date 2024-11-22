@@ -1,8 +1,12 @@
 import React from 'react'
+import Navbar from '../components/navbar'
 
 const Analytics = () => {
     return (
-        <div>Ini page analytics</div>
+        <div>
+            <Navbar/>
+            Ini page analytics
+        </div>
     )
 }
 
