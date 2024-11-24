@@ -2,9 +2,10 @@ import React from "react";
 
 interface ButtonProps {
   children: React.ReactNode;
+  onClick: () => void;
 }
 
-const defaultButton: React.FC<ButtonProps> = ({ children }) => {
+const defaultButton: React.FC<ButtonProps> = ({ children, onClick }) => {
   const handleMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.currentTarget.style.opacity = "0.7";
   };
@@ -15,6 +16,7 @@ const defaultButton: React.FC<ButtonProps> = ({ children }) => {
 
   return (
     <button
+      onClick={onClick}
       className="font-['Dosis']"
       style={{
         backgroundColor: "#1D1D1D",

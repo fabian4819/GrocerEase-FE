@@ -1,40 +1,72 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { FaSearch, FaSortUp, FaSortDown } from "react-icons/fa";
+import Link from "next/link";
 import Navbar from "../components/navbar";
 import DefaultButton from "../components/defaultButton";
 
+//Change store_id type if it's not number
 type Store = {
   store_id: number;
   store_name: string;
   image_link: string;
   location: string;
+  latitude: number;
+  longitude: number;
   contact_info: string;
   opening_hours: string;
   description: string;
 };
 
-const dummyStores: Store[] = Array.from({ length: 100 }, (_, i) => ({
-  store_id: i + 1,
-  store_name: `Toko ${i + 1}`,
-  image_link: `/img/background.jpg`, // Alternating image links for simplicity
-  location: `Lokasi ${i + 1}`,
-  contact_info: `+62 812 345 67${i}`,
-  opening_hours: "9 AM - 9 PM",
-  description: `Contoh deskripsi untuk toko ke-${
-    i + 1
-  }. Cuma untuk placeholder yak.`,
-}));
+type User = {
+  address: string;
+  latitude: number;
+  longitude: number;
+};
+
+const user: User = {
+  address: "User Address",
+  latitude: -7.770717, // UGM, Yogyakarta
+  longitude: 110.3695,
+};
 
 const StoreList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
+  //Dummy Stores
+  const [dummyStores, setDummyStores] = useState<Store[]>([]);
+
+  useEffect(() => {
+    const getPseudoRandomOffset = (seed: number) => {
+      return ((Math.sin(seed) + 1) / 2) * 0.01 - 0.005; // Scale to (-0.005, 0.005)
+    };
+
+    const generateDummyStores = () => {
+      const stores = Array.from({ length: 100 }, (_, i) => ({
+        store_id: i + 1,
+        store_name: `Toko ${i + 1}`,
+        image_link: `/img/background.jpg`,
+        location: `Lokasi ${i + 1}`,
+        latitude: -7.780717 + getPseudoRandomOffset(i + 1),
+        longitude: 110.387724 + getPseudoRandomOffset(100 + i + 1),
+        contact_info: `+62 812 345 67${i}`,
+        opening_hours: "9 AM - 9 PM",
+        description: `Contoh deskripsi untuk toko ke-${
+          i + 1
+        }. Cuma untuk placeholder yak.`,
+      }));
+      setDummyStores(stores);
+    };
+
+    generateDummyStores();
+  }, []);
+
   //TODO: Fitur Search untuk mencari nama toko
   const [searchTerm, setSearchTerm] = useState("");
-  const [isAscending, setIsAscending] = useState(true); // Menyimpan status urutan
-  const [sortBy, setSortBy] = useState<string>("name");
+  const [isAscending, setIsAscending] = useState(true);
+  const [sortBy, setSortBy] = useState<string>("nosort");
 
   const storesPerPage = 10;
 
@@ -49,7 +81,19 @@ const StoreList: React.FC = () => {
       if (sortBy === "name") {
         comparison = a.store_name.localeCompare(b.store_name);
       } else if (sortBy === "location") {
-        comparison = a.location.localeCompare(b.location);
+        const distanceA = haversineDistance(
+          user.latitude,
+          user.longitude,
+          a.latitude,
+          a.longitude
+        );
+        const distanceB = haversineDistance(
+          user.latitude,
+          user.longitude,
+          b.latitude,
+          b.longitude
+        );
+        comparison = distanceA - distanceB;
       }
 
       // If isAscending is false, reverse the order
@@ -74,6 +118,37 @@ const StoreList: React.FC = () => {
     return pages;
   };
 
+  function haversineDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ) {
+    const R = 6378137; // Earth's radius in meters
+
+    const φ1 = (lat1 * Math.PI) / 180; // φ, λ in radians
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    const distance = R * c; // in meters
+
+    return distance;
+  }
+
+  function formatDistance(distance: number) {
+    if (distance < 1000) {
+      return `${Math.round(distance)} m`; // Display in meters if less than 1 km
+    } else {
+      return `${(distance / 1000).toFixed(2)} km`; // Display in kilometers
+    }
+  }
+
   // Handle page change
   const handlePageChange = (page: number | string) => {
     if (typeof page === "number" && page > 0 && page <= totalPages) {
@@ -84,6 +159,8 @@ const StoreList: React.FC = () => {
   const handleSortOrderToggle = () => {
     setIsAscending(!isAscending);
   };
+
+  const doNothing = () => {};
 
   return (
     <div className="w-full min-h-screen bg-white font-['Dosis']">
@@ -159,9 +236,9 @@ const StoreList: React.FC = () => {
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
             >
+              <option value="nosort">Jangan Urutkan</option>
               <option value="name">Nama</option>
               <option value="location">Lokasi</option>
-              <option value="nosort">Jangan Urutkan</option>
             </select>
             <button onClick={handleSortOrderToggle}>
               {isAscending ? (
@@ -174,61 +251,75 @@ const StoreList: React.FC = () => {
         </div>
 
         {/* List Store */}
-        {currentStores.map((store) => (
-          <div
-            key={store.store_id}
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "10px",
-              padding: "20px",
-              marginBottom: "20px",
-              display: "flex",
-            }}
-          >
-            <div>
-              <Image
-                src={store.image_link}
-                alt={store.store_name}
-                width={150}
-                height={150}
-                style={{
-                  borderRadius: "8px",
-                  marginTop: "15px",
-                  marginRight: "20px",
-                }}
-              />
-            </div>
-            <div
-              className={"font-['Dosis']"}
-              style={{ flex: 1, color: "black" }}
-            >
-              <h2
-                style={{
-                  margin: "0 0 10px 0",
-                  fontSize: 20,
-                  fontWeight: "bold",
-                }}
-              >
-                {store.store_name}
-              </h2>
-              <p>
-                <strong>Location:</strong> {store.location}
-              </p>
-              <p>
-                <strong>Contact Info:</strong> {store.contact_info}
-              </p>
-              <p>
-                <strong>Opening Hours:</strong> {store.opening_hours}
-              </p>
-              <p>{store.description}</p>
-            </div>
-            <div>
-              <DefaultButton>Lihat Detail</DefaultButton>
-            </div>
-          </div>
-        ))}
+        {currentStores.map((store) => {
+          const distance = haversineDistance(
+            user.latitude,
+            user.longitude,
+            store.latitude,
+            store.longitude
+          );
 
-        {/* Handle nomor page di bawah */}
+          return (
+            <div
+              key={store.store_id}
+              style={{
+                border: "1px solid #ccc",
+                borderRadius: "10px",
+                padding: "20px",
+                marginBottom: "20px",
+                display: "flex",
+              }}
+            >
+              <div>
+                <Image
+                  src={store.image_link}
+                  alt={store.store_name}
+                  width={150}
+                  height={150}
+                  style={{
+                    borderRadius: "8px",
+                    marginTop: "15px",
+                    marginRight: "20px",
+                  }}
+                />
+              </div>
+              <div
+                className={"font-['Dosis']"}
+                style={{ flex: 1, color: "black" }}
+              >
+                <h2
+                  style={{
+                    margin: "0 0 10px 0",
+                    fontSize: 20,
+                    fontWeight: "bold",
+                  }}
+                >
+                  {store.store_name} ({formatDistance(distance)} dari lokasi
+                  Anda)
+                </h2>
+                <p>
+                  <strong>Lokasi:</strong> {store.location}
+                </p>
+                <p>
+                  <strong>Info Kontak:</strong> {store.contact_info}
+                </p>
+                <p>
+                  <strong>Jam Buka:</strong> {store.opening_hours}
+                </p>
+                <p>{store.description}</p>
+              </div>
+              <div>
+                <Link href={`/storeDetail/${store.store_id}`}>
+                  <DefaultButton onClick={doNothing}>
+                    View Details
+                  </DefaultButton>
+                </Link>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Pagination */}
         <div
           style={{
             display: "flex",
@@ -241,10 +332,24 @@ const StoreList: React.FC = () => {
             disabled={currentPage === 1}
             style={{
               margin: "0 5px",
-              padding: "10px",
+              width: "40px",
+              height: "40px",
+              borderRadius: "50%",
               cursor: currentPage === 1 ? "not-allowed" : "pointer",
-              backgroundColor: "#f0f0f0",
+              color: "#000",
+              backgroundColor: "#fff",
               border: "1px solid #ccc",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#ccc"; // Dimmed black
+              e.currentTarget.style.color = "#000"; // Keep text black
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "#fff"; // Default white
+              e.currentTarget.style.color = "#000"; // Default black text
             }}
           >
             &lt;
@@ -256,11 +361,29 @@ const StoreList: React.FC = () => {
                 onClick={() => handlePageChange(page)}
                 style={{
                   margin: "0 5px",
-                  padding: "10px",
-                  backgroundColor: currentPage === page ? "#007BFF" : "#f0f0f0",
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "50%",
+                  backgroundColor: currentPage === page ? "#000" : "#fff",
                   color: currentPage === page ? "#fff" : "#000",
                   border: "1px solid #ccc",
                   cursor: "pointer",
+                  transition: "background-color 0.2s, color 0.2s",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                onMouseEnter={(e) => {
+                  if (currentPage !== page) {
+                    e.currentTarget.style.backgroundColor = "#ccc"; // Dimmed black
+                    e.currentTarget.style.color = "#000"; // Keep text black
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (currentPage !== page) {
+                    e.currentTarget.style.backgroundColor = "#fff"; // Default white
+                    e.currentTarget.style.color = "#000"; // Default black text
+                  }
                 }}
               >
                 {page}
@@ -270,7 +393,12 @@ const StoreList: React.FC = () => {
                 key={index}
                 style={{
                   margin: "0 5px",
-                  padding: "10px",
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                   color: "#888",
                 }}
               >
@@ -283,10 +411,24 @@ const StoreList: React.FC = () => {
             disabled={currentPage === totalPages}
             style={{
               margin: "0 5px",
-              padding: "10px",
+              width: "40px",
+              height: "40px",
+              borderRadius: "50%",
               cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-              backgroundColor: "#f0f0f0",
+              backgroundColor: "#fff",
+              color: "#000",
               border: "1px solid #ccc",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#ccc"; // Dimmed black
+              e.currentTarget.style.color = "#000"; // Keep text black
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "#fff"; // Default white
+              e.currentTarget.style.color = "#000"; // Default black text
             }}
           >
             &gt;
@@ -301,8 +443,8 @@ const StoreList: React.FC = () => {
             marginTop: "20px",
           }}
         >
-          <DefaultButton>Tambah Toko Anda</DefaultButton>
-          <DefaultButton>Lihat Toko Anda</DefaultButton>
+          <DefaultButton onClick={doNothing}>Tambah Toko Anda</DefaultButton>
+          <DefaultButton onClick={doNothing}>Lihat Toko Anda</DefaultButton>
         </div>
       </div>
     </div>
