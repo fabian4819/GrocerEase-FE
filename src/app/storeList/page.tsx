@@ -6,6 +6,7 @@ import { FaSearch, FaSortUp, FaSortDown } from "react-icons/fa";
 import Link from "next/link";
 import Navbar from "../components/navbar";
 import DefaultButton from "../components/defaultButton";
+import PaginationButton from "../components/paginationButton";
 
 //Change store_id type if it's not number
 type Store = {
@@ -49,8 +50,8 @@ const StoreList: React.FC = () => {
         store_name: `Toko ${i + 1}`,
         image_link: `/img/background.jpg`,
         location: `Lokasi ${i + 1}`,
-        latitude: -7.780717 + getPseudoRandomOffset(i + 1),
-        longitude: 110.387724 + getPseudoRandomOffset(100 + i + 1),
+        latitude: -7.770717 + getPseudoRandomOffset(i + 1),
+        longitude: 110.3695 + getPseudoRandomOffset(100 + i + 1),
         contact_info: `+62 812 345 67${i}`,
         opening_hours: "9 AM - 9 PM",
         description: `Contoh deskripsi untuk toko ke-${
@@ -197,7 +198,7 @@ const StoreList: React.FC = () => {
               type="text"
               placeholder="Cari Toko"
               value={searchTerm}
-              className="w-[415px] border-2 text-[#1c1c1c] border-[#1c1c1c] rounded-full py-2 px-4 "
+              className="w-[415px] border-2 font-['Dosis'] text-[#1c1c1c] border-[#1c1c1c] rounded-full py-2 px-4 "
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
                 width: "100%",
@@ -327,52 +328,25 @@ const StoreList: React.FC = () => {
             margin: "20px 0",
           }}
         >
-          <button
+          <PaginationButton
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            style={{
-              margin: "0 5px",
-              width: "40px",
-              height: "40px",
-              borderRadius: "50%",
-              cursor: currentPage === 1 ? "not-allowed" : "pointer",
-              color: "#000",
-              backgroundColor: "#fff",
-              border: "1px solid #ccc",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = "#ccc"; // Dimmed black
               e.currentTarget.style.color = "#000"; // Keep text black
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#fff"; // Default white
-              e.currentTarget.style.color = "#000"; // Default black text
+              e.currentTarget.style.backgroundColor = "#fff"; // White
+              e.currentTarget.style.color = "#000"; // Keep text black
             }}
           >
             &lt;
-          </button>
+          </PaginationButton>
           {getPagination().map((page, index) =>
             typeof page === "number" ? (
-              <button
+              <PaginationButton
                 key={index}
                 onClick={() => handlePageChange(page)}
-                style={{
-                  margin: "0 5px",
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "50%",
-                  backgroundColor: currentPage === page ? "#000" : "#fff",
-                  color: currentPage === page ? "#fff" : "#000",
-                  border: "1px solid #ccc",
-                  cursor: "pointer",
-                  transition: "background-color 0.2s, color 0.2s",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
                 onMouseEnter={(e) => {
                   if (currentPage !== page) {
                     e.currentTarget.style.backgroundColor = "#ccc"; // Dimmed black
@@ -381,13 +355,17 @@ const StoreList: React.FC = () => {
                 }}
                 onMouseLeave={(e) => {
                   if (currentPage !== page) {
-                    e.currentTarget.style.backgroundColor = "#fff"; // Default white
-                    e.currentTarget.style.color = "#000"; // Default black text
+                    e.currentTarget.style.backgroundColor = "#fff"; // White
+                    e.currentTarget.style.color = "#000"; // Keep text black
                   }
+                }}
+                customStyle={{
+                  backgroundColor: currentPage === page ? "#000" : "#fff",
+                  color: currentPage === page ? "#fff" : "#000",
                 }}
               >
                 {page}
-              </button>
+              </PaginationButton>
             ) : (
               <span
                 key={index}
@@ -406,33 +384,20 @@ const StoreList: React.FC = () => {
               </span>
             )
           )}
-          <button
+          <PaginationButton
             onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            style={{
-              margin: "0 5px",
-              width: "40px",
-              height: "40px",
-              borderRadius: "50%",
-              cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-              backgroundColor: "#fff",
-              color: "#000",
-              border: "1px solid #ccc",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = "#ccc"; // Dimmed black
               e.currentTarget.style.color = "#000"; // Keep text black
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#fff"; // Default white
-              e.currentTarget.style.color = "#000"; // Default black text
+              e.currentTarget.style.backgroundColor = "#fff"; // White
+              e.currentTarget.style.color = "#000"; // Keep text black
             }}
+            disabled={currentPage === totalPages}
           >
             &gt;
-          </button>
+          </PaginationButton>
         </div>
 
         {/* Tombol button di bawah */}
