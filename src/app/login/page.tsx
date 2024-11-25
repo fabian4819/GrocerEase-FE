@@ -1,29 +1,46 @@
+'use client';
 import React from "react";
-import "./Login.css";
+import Link from 'next/link';
 import LoginButton from '../components/loginButton'
 
 const Login = () => {
-  console.log("Login component loaded");
-  return (
-    <div className="login-container">
-      <div className="login-box">
-        <h2>Masuk ke Dashboard</h2>
+  return(  
+  <div className="w-full h-screen bg-cover bg-center bg-[url('/img/background.jpg')]">
+    <div className="absolute inset-0 bg-black opacity-20"></div>
+    <div className="flex items-center justify-center min-h-screen">
+      {/* Login Card */}
+      <div className="relative w-[90%] max-w-[426px] bg-neutral-100 p-6 rounded-lg shadow-lg">
+        {/* Header */}
+        <h1 className="text-center mb-6 text-[#22577a] text-[49.77px] font-semibold font-['Dosis']">Masuk ke Dashboard</h1>
+        {/* Form */}
         <form>
-          <div className="input-box">
-            <label>Email</label>
-            <input type="email" placeholder="email@mail.com" required />
+          {/* Email Input */}
+          <div className="w-[80%] mx-auto mb-6">
+            <input
+              type="email"
+              placeholder="email@mail.com"
+              className="w-full h-12 bg-neutral-100 border-b border-[#393a41] pl-[14px] text-[#747680] text-2xl font-light font-['Dosis'] focus:outline-none"
+            />
           </div>
-          <div className="input-box">
-            <label>Password</label>
-            <input type="password" placeholder="password" required />
+          {/* Password Input */}
+          <div className="w-[80%] mx-auto mb-6">
+            <input
+              type="password"
+              placeholder="password"
+              className="w-full h-12 bg-neutral-100 border-b border-[#393a41] pl-[14px] text-[#747680] text-2xl font-light font-['Dosis'] focus:outline-none"
+            />
           </div>
-          <button type="submit" className="submit-btn">
-            Masuk <span>➡️</span>
-          </button>
+          {/* Submit Button */}
+          <div className="w-[80%] mx-auto">
+            <Link href="/dashboard">
+              <LoginButton/>
+            </Link>
+          </div>
         </form>
       </div>
     </div>
-  );
-};
+    </div>
+    )
+}
 
 export default Login;
