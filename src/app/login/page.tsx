@@ -34,7 +34,7 @@ const Login = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_AUTH}api/auth/login`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_AUTH}auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
