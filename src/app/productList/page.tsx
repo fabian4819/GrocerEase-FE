@@ -332,19 +332,17 @@ function ProductListPage() {
                     <p className="text-black mb-2">
                       Rp {product.product.price.toLocaleString()}
                     </p>
-
+                    <div className="w-full font-['Dosis'] text-left text-black text-sm font-black">
+                      {product.store.store_name}  ({formatDistance(distance)})
+                    </div>
+            
                     <div className="w-full text-left">
                       <p className="text-sm text-black">
                         {product.product.description}
                       </p>
                     </div>
 
-                    <div className="w-full font-['Dosis']">
-                      {product.store.store_name}
-                    </div>
-                    <div className="w-full font-['Dosis']">
-                      {formatDistance(distance)}
-                    </div>
+                
                   </div>
                 );
               })}
