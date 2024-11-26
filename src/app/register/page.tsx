@@ -1,7 +1,7 @@
-'use client';
-'use client';
+"use client";
+"use client";
 import React, { useState } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import RegisterButton from "../components/registerButton";
 
 interface RegisterForm {
@@ -11,38 +11,38 @@ interface RegisterForm {
   confirmPassword: string;
   address: string;
   latitude: number;
-  longitude: number
+  longitude: number;
 }
 
 const Register = () => {
   const router = useRouter();
   const [formData, setFormData] = useState<RegisterForm>({
-    email: '',
-    username: '',
-    password: '',
-    confirmPassword: '',
-    address: '',
+    email: "",
+    username: "",
+    password: "",
+    confirmPassword: "",
+    address: "",
     latitude: 0,
-    longitude: 0
+    longitude: 0,
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setError('');
+    setError("");
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const validateForm = () => {
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       return false;
     }
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setError("Password must be at least 6 characters long");
       return false;
     }
     return true;
@@ -56,50 +56,53 @@ const Register = () => {
     }
 
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       const LatLong = await getLatLong(formData.address);
-      if(LatLong){
-        const{lat, lng}= LatLong;
+      if (LatLong) {
+        const { lat, lng } = LatLong;
         formData.latitude = lat as number;
         formData.longitude = lng as number;
-        console.log(formData)
+        console.log(formData);
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_AUTH}auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          username: formData.username,
-          password: formData.password,
-          address: formData.address,
-          latitude: formData.latitude,
-          longitude: formData.longitude
-        }),
-        signal: controller.signal
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_AUTH}auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            username: formData.username,
+            password: formData.password,
+            address: formData.address,
+            latitude: formData.latitude,
+            longitude: formData.longitude,
+          }),
+          signal: controller.signal,
+        }
+      );
 
       clearTimeout(timeoutId);
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
+        throw new Error(data.message || "Registration failed");
       }
 
-      router.push('/login');
+      router.push("/login");
     } catch (err) {
       if (err instanceof Error) {
-        setError(err.name === 'AbortError' ? 'Request timeout' : err.message);
+        setError(err.name === "AbortError" ? "Request timeout" : err.message);
       } else {
-        setError('Registration failed');
+        setError("Registration failed");
       }
     } finally {
       setIsLoading(false);
@@ -111,7 +114,7 @@ const Register = () => {
     try {
       const response = await fetch(
         `https://geocode.search.hereapi.com/v1/geocode?q=${encodeURIComponent(
-          address 
+          address
         )}&in=countryCode:IDN&limit=1&apiKey=${apiKey}`
       );
 
@@ -154,7 +157,7 @@ const Register = () => {
                 onChange={handleChange}
                 placeholder="email@mail.com"
                 className={`w-full h-12 bg-neutral-100 border-b border-[#393a41] pl-[14px] text-[#747680] text-2xl font-light font-['Dosis'] focus:outline-none transition-colors duration-200
-                  ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                 required
                 disabled={isLoading}
               />
@@ -167,7 +170,7 @@ const Register = () => {
                 onChange={handleChange}
                 placeholder="Username"
                 className={`w-full h-12 bg-neutral-100 border-b border-[#393a41] pl-[14px] text-[#747680] text-2xl font-light font-['Dosis'] focus:outline-none transition-colors duration-200
-                  ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                 required
                 disabled={isLoading}
               />
@@ -180,7 +183,7 @@ const Register = () => {
                 onChange={handleChange}
                 placeholder="Password"
                 className={`w-full h-12 bg-neutral-100 border-b border-[#393a41] pl-[14px] text-[#747680] text-2xl font-light font-['Dosis'] focus:outline-none transition-colors duration-200
-                  ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                 required
                 disabled={isLoading}
               />
@@ -193,7 +196,7 @@ const Register = () => {
                 onChange={handleChange}
                 placeholder="Confirm Password"
                 className={`w-full h-12 bg-neutral-100 border-b border-[#393a41] pl-[14px] text-[#747680] text-2xl font-light font-['Dosis'] focus:outline-none transition-colors duration-200
-                  ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                 required
                 disabled={isLoading}
               />
@@ -206,7 +209,7 @@ const Register = () => {
                 onChange={handleChange}
                 placeholder="Address"
                 className={`w-full h-12 bg-neutral-100 border-b border-[#393a41] pl-[14px] text-[#747680] text-2xl font-light font-['Dosis'] focus:outline-none transition-colors duration-200
-                  ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                 required
                 disabled={isLoading}
               />
@@ -214,7 +217,9 @@ const Register = () => {
             <div className="w-[80%] mx-auto">
               <button
                 type="submit"
-                className={`w-full relative ${isLoading ? 'cursor-not-allowed' : ''}`}
+                className={`w-full relative ${
+                  isLoading ? "cursor-not-allowed" : ""
+                }`}
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -228,10 +233,10 @@ const Register = () => {
             </div>
             <div className="w-[80%] mx-auto mt-4 text-center">
               <p className="text-[#747680]">
-                Already have an account?{' '}
+                Already have an account?{" "}
                 <span
                   className="text-[#22577a] cursor-pointer hover:underline"
-                  onClick={() => router.push('/login')}
+                  onClick={() => router.push("/login")}
                 >
                   Login here
                 </span>

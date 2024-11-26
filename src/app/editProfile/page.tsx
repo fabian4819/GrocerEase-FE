@@ -1,42 +1,41 @@
-'use client'
-import React, { useState, useEffect } from 'react';
-import Navbar from '../components/navbar';
+"use client";
+import React, { useState, useEffect } from "react";
+import Navbar from "../components/navbar";
 
 const EditProfile = () => {
-
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    address: '',
-    currentPassword: '',
-    newPassword: '',
-    confirmNewPassword: '',
+    username: "",
+    email: "",
+    address: "",
+    currentPassword: "",
+    newPassword: "",
+    confirmNewPassword: "",
   });
 
   const [isLoading, setIsLoading] = useState(false); // Tracks the loading state
-  const [error, setError] = useState(''); // Tracks error messages
+  const [error, setError] = useState(""); // Tracks error messages
   const [success, setSuccess] = useState(false); // Tracks success messages
-
 
   useEffect(() => {
     // Access localStorage in the client environment
-    if (typeof window !== 'undefined') {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (typeof window !== "undefined") {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
       setFormData({
-        username: user.username || '',
-        email: user.email || '',
-        address: user.address || '',
-        currentPassword: '',
-        newPassword: '',
-        confirmNewPassword: ''
+        username: user.username || "",
+        email: user.email || "",
+        address: user.address || "",
+        currentPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
       });
     }
   }, []);
 
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setError('');
+    setError("");
     setSuccess(false);
+    console.log(error, success);
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
@@ -46,49 +45,52 @@ const EditProfile = () => {
     e.preventDefault();
 
     if (formData.newPassword !== formData.confirmNewPassword) {
-      setError('Password baru dan konfirmasi password tidak cocok!');
+      setError("Password baru dan konfirmasi password tidak cocok!");
       return;
     }
 
     setIsLoading(true);
-    setError('');
+    setError("");
     setSuccess(false);
 
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
       const userId = user.id;
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_AUTH}/api/auth/editProfile/${userId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-          address: formData.address,
-          currentPassword: formData.currentPassword,
-          newPassword: formData.newPassword,
-        }),
-        signal: controller.signal,
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_AUTH}/api/auth/editProfile/${userId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: formData.username,
+            email: formData.email,
+            address: formData.address,
+            currentPassword: formData.currentPassword,
+            newPassword: formData.newPassword,
+          }),
+          signal: controller.signal,
+        }
+      );
 
       clearTimeout(timeoutId);
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to update profile');
+        throw new Error(data.message || "Failed to update profile");
       }
 
       setSuccess(true); // Indicates success
     } catch (err) {
       if (err instanceof Error) {
-        setError(err.name === 'AbortError' ? 'Request timeout' : err.message);
+        setError(err.name === "AbortError" ? "Request timeout" : err.message);
       } else {
-        setError('Failed to update profile');
+        setError("Failed to update profile");
       }
     } finally {
       setIsLoading(false);
@@ -189,7 +191,7 @@ const EditProfile = () => {
             <button
               type="button"
               className="text-black text-base font-normal font-['Dosis'] leading-normal"
-              onClick={() => alert('Perubahan dibatalkan!')}
+              onClick={() => alert("Perubahan dibatalkan!")}
             >
               Batalkan
             </button>
@@ -198,7 +200,7 @@ const EditProfile = () => {
               className="w-[200px] h-[50px] bg-[#22577a] text-white text-lg font-normal font-['Dosis'] rounded"
               disabled={isLoading}
             >
-              {isLoading ? 'Loading...' : 'Simpan Perubahan'}
+              {isLoading ? "Loading..." : "Simpan Perubahan"}
             </button>
           </div>
         </form>
