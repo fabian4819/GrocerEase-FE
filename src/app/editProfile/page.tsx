@@ -34,11 +34,12 @@ const EditProfile = () => {
   };
 
   return (
-    <div className="w-full h-full relative bg-white">
+    <div className="w-full h-[1024px] relative bg-cover bg-white">
       <Navbar />
+      <div className="flex items-center justify-center min-h-screen">
       <form
         onSubmit={handleSubmit}
-        className="w-[870px] h-[630px] left-[311px] top-[231px] absolute bg-white rounded-[20px] shadow"
+        className="w-[870px] h-[630px] relative bg-white rounded-[20px] shadow"
       >
         <div className="left-[80px] top-[40px] absolute text-[#22577a] text-xl font-medium font-['Dosis'] leading-7">
           Edit Informasi Profile
@@ -133,6 +134,7 @@ const EditProfile = () => {
         <DefaultButton onClick={doNothing}>Simpan Perubahan</ DefaultButton>
         </div>
       </form>
+      </div>
     </div>
   );
 };
