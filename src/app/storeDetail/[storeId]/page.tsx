@@ -4,7 +4,16 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { FaSearch, FaSortUp, FaSortDown, FaMapMarkerAlt, FaPhoneAlt, FaClock, FaArrowLeft, FaStore } from "react-icons/fa";
+import {
+  FaSearch,
+  FaSortUp,
+  FaSortDown,
+  FaMapMarkerAlt,
+  FaPhoneAlt,
+  FaClock,
+  FaArrowLeft,
+  FaStore,
+} from "react-icons/fa";
 import Navbar from "@/app/components/navbar";
 import PaginationButton from "@/app/components/paginationButton";
 import DefaultButton from "@/app/components/defaultButton";
@@ -69,23 +78,25 @@ function StoreDetailPage() {
         // Fetch store details
         const storeResponse = await fetch(`${API_URL}stores/${storeId}`);
         if (!storeResponse.ok) {
-          throw new Error('Failed to fetch store details');
+          throw new Error("Failed to fetch store details");
         }
         const storeData = await storeResponse.json();
         setStore(storeData);
 
         // Fetch store's products
-        const productsResponse = await fetch(`${API_URL}products/store/${storeId}`);
+        const productsResponse = await fetch(
+          `${API_URL}products/store/${storeId}`
+        );
         if (!productsResponse.ok) {
-          throw new Error('Failed to fetch products');
+          throw new Error("Failed to fetch products");
         }
         const productsData = await productsResponse.json();
         setProducts(productsData);
 
         setError(null);
       } catch (err) {
-        setError('Error loading store data. Please try again later.');
-        console.error('Error fetching store data:', err);
+        setError("Error loading store data. Please try again later.");
+        console.error("Error fetching store data:", err);
       } finally {
         setIsLoading(false);
       }
@@ -108,7 +119,7 @@ function StoreDetailPage() {
     return (
       <div className="w-full min-h-screen bg-white font-['Dosis'] flex items-center justify-center">
         <div className="text-2xl text-red-500">
-          {error || 'Store not found'}
+          {error || "Store not found"}
         </div>
       </div>
     );
@@ -129,6 +140,7 @@ function StoreDetailPage() {
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
   const startIndex = (currentPage - 1) * productsPerPage;
   const currentProducts = filteredProducts.slice(
+    startIndex,
     startIndex + productsPerPage
   );
 
@@ -189,7 +201,7 @@ function StoreDetailPage() {
           <div className="mb-6">
             <Link href="/storeList">
               <div className="inline-flex items-center gap-2 hover:-translate-x-1 transition-all duration-300">
-                <DefaultButton onClick={() => { }}>
+                <DefaultButton onClick={() => {}}>
                   <span className="flex items-center gap-2">
                     <FaArrowLeft />
                     Kembali ke Daftar Toko
@@ -225,14 +237,18 @@ function StoreDetailPage() {
                   <FaPhoneAlt className="text-blue-500 text-xl" />
                   <div>
                     <p className="text-sm text-gray-500">Kontak</p>
-                    <p className="font-semibold text-black">{store.contact_info}</p>
+                    <p className="font-semibold text-black">
+                      {store.contact_info}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
                   <FaClock className="text-blue-500 text-xl" />
                   <div>
                     <p className="text-sm text-gray-500">Jam Operasional</p>
-                    <p className="font-semibold text-black">{store.opening_hours}</p>
+                    <p className="font-semibold text-black">
+                      {store.opening_hours}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
@@ -244,7 +260,9 @@ function StoreDetailPage() {
                 </div>
               </div>
 
-              <p className="text-gray-600 leading-relaxed">{store.description}</p>
+              <p className="text-gray-600 leading-relaxed">
+                {store.description}
+              </p>
             </div>
           </div>
 
@@ -273,7 +291,9 @@ function StoreDetailPage() {
                 <select
                   className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
                   value={sortBy || ""}
-                  onChange={(e) => setSortBy(e.target.value as "name" | "price" | null)}
+                  onChange={(e) =>
+                    setSortBy(e.target.value as "name" | "price" | null)
+                  }
                 >
                   <option value="">Standar</option>
                   <option value="name">Nama</option>
@@ -283,7 +303,11 @@ function StoreDetailPage() {
                   onClick={() => setIsAscending(!isAscending)}
                   className="p-2 hover:bg-gray-100 rounded-full transition-all duration-300"
                 >
-                  {isAscending ? <FaSortUp className="text-xl" /> : <FaSortDown className="text-xl" />}
+                  {isAscending ? (
+                    <FaSortUp className="text-xl" />
+                  ) : (
+                    <FaSortDown className="text-xl" />
+                  )}
                 </button>
               </div>
             </div>
