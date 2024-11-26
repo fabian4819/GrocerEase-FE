@@ -318,7 +318,7 @@ const StoreList = () => {
             </div>
 
             <div className="flex justify-center gap-4 mt-12">
-              <Link href="/store/create">
+              <Link href="/addStore">
                 <DefaultButton onClick={() => {}}>
                   Tambah Toko Anda
                 </DefaultButton>
