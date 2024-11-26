@@ -10,7 +10,7 @@ import PaginationButton from "../components/paginationButton";
 import { api } from '@/utils/api';
 
 type Store = {
-  store_id: string;
+  _id: string;
   store_name: string;
   image_link: string;
   location: string;
@@ -43,7 +43,7 @@ const StoreList = () => {
   const [error, setError] = useState<string | null>(null);
 
   const storesPerPage = 10;
-  const API_URL = process.env.NEXT_PUBLIC_API_AUTH || 'http://localhost:5000/';
+  // const API_URL = process.env.NEXT_PUBLIC_API_AUTH || 'http://localhost:5000/';
 
   // Fetch stores from API
   useEffect(() => {
@@ -214,7 +214,7 @@ const StoreList = () => {
 
               return (
                 <div
-                  key={store.store_id}
+                  key={store._id}
                   className="border rounded-lg p-6 mb-6 flex items-start"
                 >
                   <div className="flex-shrink-0">
@@ -236,7 +236,7 @@ const StoreList = () => {
                     <p>{store.description}</p>
                   </div>
                   <div>
-                    <Link href={`/storeDetail/${store.store_id}`}>
+                    <Link href={`/storeDetail/${store._id}`}>
                       <DefaultButton onClick={() => {}}>
                         View Details
                       </DefaultButton>
