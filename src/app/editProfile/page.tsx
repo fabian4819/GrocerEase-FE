@@ -2,8 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/navbar';
 
-const doNothing = () => {};
-
 const EditProfile = () => {
 
   const [formData, setFormData] = useState({
