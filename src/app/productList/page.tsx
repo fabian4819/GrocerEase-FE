@@ -27,17 +27,19 @@ type Product = {
   price: number;
   image_link: string;
   store_id: string;
-  store?: Store; // Store information will be populated by the backend
+};
+
+type JoinedProduct = {
+  store: Store;
+  product: Product;
 };
 
 type User = {
-  address: string;
   latitude: number;
   longitude: number;
 };
 
 const user: User = {
-  address: "User Address",
   latitude: -7.770717,
   longitude: 110.3695,
 };
@@ -46,10 +48,13 @@ const API_URL = process.env.NEXT_PUBLIC_API_AUTH;
 
 function ProductListPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [stores, setStores] = useState<Store[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState<"name" | "price" | "location" | null>(null);
+  const [sortBy, setSortBy] = useState<"name" | "price" | "location" | null>(
+    null
+  );
   const [isAscending, setIsAscending] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -65,24 +70,61 @@ function ProductListPage() {
         // Fetch all products
         const response = await fetch(`${API_URL}products`);
         if (!response.ok) {
-          throw new Error('Failed to fetch products');
+          throw new Error("Failed to fetch products");
         }
-        
+
         const data = await response.json();
         setProducts(data);
       } catch (err) {
-        setError('Error loading products. Please try again later.');
-        console.error('Error fetching products:', err);
+        setError("Error loading products. Please try again later.");
+        console.error("Error fetching products:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const fetchStores = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Fetch all products
+        const response = await fetch(`${API_URL}stores`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch stores");
+        }
+
+        const data = await response.json();
+        setStores(data);
+      } catch (err) {
+        setError("Error loading stores. Please try again later.");
+        console.error("Error fetching stores:", err);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchProducts();
+    fetchStores();
   }, []);
 
+  const product_store: JoinedProduct[] = products
+    .map((product) => {
+      const store = stores.find((store) => store._id === product.store_id);
+      if (store) {
+        return { store, product };
+      }
+      return null;
+    })
+    .filter((entry): entry is JoinedProduct => entry !== null);
+
   // Calculate distance helper function
-  const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const haversineDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ) => {
     const R = 6378137;
     const φ1 = (lat1 * Math.PI) / 180;
     const φ2 = (lat2 * Math.PI) / 180;
@@ -96,14 +138,16 @@ function ProductListPage() {
     return R * c;
   };
 
-  // const formatDistance = (distance: number) => {
-  //   return distance < 1000 ? `${Math.round(distance)} m` : `${(distance / 1000).toFixed(2)} km`;
-  // };
+  const formatDistance = (distance: number) => {
+    return distance < 1000
+      ? `${Math.round(distance)} m`
+      : `${(distance / 1000).toFixed(2)} km`;
+  };
 
   // Filter and sort products
-  const filteredProducts = products
+  const filteredProducts = product_store
     .filter((product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+      product.product.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
       if (!sortBy) return 0;
@@ -111,10 +155,10 @@ function ProductListPage() {
       let comparison = 0;
       switch (sortBy) {
         case "name":
-          comparison = a.name.localeCompare(b.name);
+          comparison = a.product.name.localeCompare(b.product.name);
           break;
         case "price":
-          comparison = a.price - b.price;
+          comparison = a.product.price - b.product.price;
           break;
         case "location":
           if (a.store && b.store) {
@@ -140,7 +184,10 @@ function ProductListPage() {
   // Pagination logic
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
   const startIndex = (currentPage - 1) * productsPerPage;
-  const currentProducts = filteredProducts.slice(startIndex, startIndex + productsPerPage);
+  const currentProducts = filteredProducts.slice(
+    startIndex,
+    startIndex + productsPerPage
+  );
 
   const getPagination = () => {
     const pages: (string | number)[] = [];
@@ -224,18 +271,26 @@ function ProductListPage() {
                   className="bg-white text-black border border-gray-200 rounded-lg px-4 py-2 
                     focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={sortBy || ""}
-                  onChange={(e) => setSortBy(e.target.value as "name" | "price" | "location" | null)}
+                  onChange={(e) =>
+                    setSortBy(
+                      e.target.value as "name" | "price" | "location" | null
+                    )
+                  }
                 >
                   <option value="">Standar</option>
                   <option value="name">Nama</option>
                   <option value="price">Harga</option>
                   <option value="location">Jarak Toko</option>
                 </select>
-                <button 
+                <button
                   onClick={() => setIsAscending(!isAscending)}
                   className="p-2 hover:bg-gray-100 rounded-full transition duration-200 text-black"
                 >
-                  {isAscending ? <FaSortUp className="text-xl" /> : <FaSortDown className="text-xl" />}
+                  {isAscending ? (
+                    <FaSortUp className="text-xl" />
+                  ) : (
+                    <FaSortDown className="text-xl" />
+                  )}
                 </button>
               </div>
             </div>
@@ -249,40 +304,60 @@ function ProductListPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {currentProducts.map((product) => (
-                <div
-                  key={product._id}
-                  className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden"
-                >
-                  <div className="relative h-48">
-                    <Image
-                      src={product.image_link || "/img/background.jpg"}
-                      alt={product.name}
-                      layout="fill"
-                      objectFit="cover"
-                      className="transition-transform duration-300 group-hover:scale-105"
-                    />
+              {currentProducts.map((product) => {
+                let distance = "-";
+                if (product.store) {
+                  distance = formatDistance(
+                    haversineDistance(
+                      user.latitude,
+                      user.longitude,
+                      product.store.latitude,
+                      product.store.longitude
+                    )
+                  );
+                } else {
+                  distance = "-";
+                }
+                return (
+                  <div
+                    key={product.product._id}
+                    className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden"
+                  >
+                    <div className="relative h-48">
+                      <Image
+                        src={
+                          product.product.image_link || "/img/background.jpg"
+                        }
+                        alt={product.product.name}
+                        layout="fill"
+                        objectFit="cover"
+                        className="transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <h3 className="text-lg font-semibold mb-2 text-black group-hover:text-blue-500 transition-colors duration-300">
+                        {product.product.name}
+                      </h3>
+                      <p className="text-lg font-bold text-blue-600 mb-2">
+                        Rp {product.product.price.toLocaleString()}
+                      </p>
+                      <p className="text-sm text-gray-500 mb-2">
+                        {distance} dari lokasi Anda
+                      </p>
+                      {product.store && (
+                        <Link href={`/storeDetail/${product.store._id}`}>
+                          <p className="text-sm text-gray-600 hover:text-blue-500 transition-colors duration-300">
+                            {product.store.store_name}
+                          </p>
+                        </Link>
+                      )}
+                      <p className="text-sm text-gray-500 mt-2 line-clamp-2">
+                        {product.product.description}
+                      </p>
+                    </div>
                   </div>
-                  <div className="p-4">
-                    <h3 className="text-lg font-semibold mb-2 text-black group-hover:text-blue-500 transition-colors duration-300">
-                      {product.name}
-                    </h3>
-                    <p className="text-lg font-bold text-blue-600 mb-2">
-                      Rp {product.price.toLocaleString()}
-                    </p>
-                    {product.store && (
-                      <Link href={`/storeDetail/${product.store._id}`}>
-                        <p className="text-sm text-gray-600 hover:text-blue-500 transition-colors duration-300">
-                          {product.store.store_name}
-                        </p>
-                      </Link>
-                    )}
-                    <p className="text-sm text-gray-500 mt-2 line-clamp-2">
-                      {product.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
