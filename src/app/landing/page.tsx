@@ -21,7 +21,7 @@ const Landing = () => {
         </Link>
       </div>
       <div className="left-[794px] top-[678px] absolute">
-        <Link href="/signup">
+        <Link href="/register">
         <RegisterButton/>
         </Link>
       </div>
