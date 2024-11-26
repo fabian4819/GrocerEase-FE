@@ -36,7 +36,7 @@ Deploy using Vercel or IaaS if you're into it ;)
 
 ## Folder Structure
 
-To customize your Kucing PAW instance, you can start from the folder structure to see how the project is managed.
+To customize your GrocerEase instance, you can start from the folder structure to see how the project is managed.
 
 .env \
 index.ts \
