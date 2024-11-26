@@ -40,6 +40,7 @@ export const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
     // credentials: 'include',
     ...options,
   };
+  
 
   try {
     const response = await fetch(`${API_URL}${endpoint}`, defaultOptions);
