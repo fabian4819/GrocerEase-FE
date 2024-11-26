@@ -5,7 +5,7 @@ interface ButtonProps {
   onClick: () => void;
 }
 
-const defaultButton: React.FC<ButtonProps> = ({ children, onClick }) => {
+const DefaultButton: React.FC<ButtonProps> = ({ children, onClick }) => {
   const handleMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.currentTarget.style.opacity = "0.7";
   };
@@ -37,4 +37,4 @@ const defaultButton: React.FC<ButtonProps> = ({ children, onClick }) => {
   );
 };
 
-export default defaultButton;
+export default DefaultButton;
