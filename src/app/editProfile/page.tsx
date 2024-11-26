@@ -8,9 +8,9 @@ const doNothing = () => {};
 const EditProfile = () => {
   // State untuk menyimpan data form
   const [formData, setFormData] = useState({
-    username: 'username',
-    email: 'emailbaru@email.com',
-    address: 'alamat baru',
+    username: '',
+    email: '',
+    address: '',
     currentPassword: '',
     newPassword: '',
     confirmNewPassword: '',
@@ -56,7 +56,7 @@ const EditProfile = () => {
               name="username"
               value={formData.username}
               onChange={handleChange}
-              className="w-[703px] h-[50px] bg-neutral-100 rounded px-4"
+              className="w-[703px] h-[50px] bg-neutral-100 rounded px-4 text-gray-600 text-lg font-normal font-[Dosis]"
             />
           </div>
         </div>
@@ -72,7 +72,7 @@ const EditProfile = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-[330px] h-[50px] bg-neutral-100 rounded px-4"
+              className="w-[330px] h-[50px] bg-neutral-100 rounded px-4 text-gray-600 text-lg font-normal font-[Dosis]"
             />
           </div>
           <div className="flex-col justify-start items-start gap-2 inline-flex">
@@ -84,7 +84,7 @@ const EditProfile = () => {
               name="address"
               value={formData.address}
               onChange={handleChange}
-              className="w-[330px] h-[50px] bg-neutral-100 rounded px-4"
+              className="w-[330px] h-[50px] bg-neutral-100 rounded px-4  text-gray-600 text-lg font-normal font-[Dosis]"
             />
           </div>
         </div>
@@ -101,7 +101,7 @@ const EditProfile = () => {
               placeholder="Current Password"
               value={formData.currentPassword}
               onChange={handleChange}
-              className="w-[710px] h-[50px] bg-neutral-100 rounded px-4"
+              className="w-[710px] h-[50px] bg-neutral-100 rounded px-4  text-gray-600 text-lg font-normal font-[Dosis]"
             />
           </div>
           <input
@@ -110,7 +110,7 @@ const EditProfile = () => {
             placeholder="New Password"
             value={formData.newPassword}
             onChange={handleChange}
-            className="w-[710px] h-[50px] bg-neutral-100 rounded px-4"
+            className="w-[710px] h-[50px] bg-neutral-100 rounded px-4 text-gray-600 text-lg font-normal font-[Dosis]"
           />
           <input
             type="password"
@@ -118,7 +118,7 @@ const EditProfile = () => {
             placeholder="Confirm New Password"
             value={formData.confirmNewPassword}
             onChange={handleChange}
-            className="w-[710px] h-[50px] bg-neutral-100 rounded px-4"
+            className="w-[710px] h-[50px] bg-neutral-100 rounded px-4  text-gray-600 text-lg font-normal font-[Dosis]"
           />
         </div>
 
@@ -140,3 +140,5 @@ const EditProfile = () => {
 };
 
 export default EditProfile;
+
+
