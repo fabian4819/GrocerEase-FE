@@ -324,11 +324,11 @@ const StoreList = () => {
                     Tambah Toko Anda
                   </DefaultButton>
                 </Link>
-                <Link href="/store/my-stores">
+                {/* <Link href="/store/my-stores">
                   <DefaultButton onClick={() => { }}>
                     Lihat Toko Anda
                   </DefaultButton>
-                </Link>
+                </Link> */}
               </div>
             </>
           )}
