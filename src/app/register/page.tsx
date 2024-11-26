@@ -10,6 +10,8 @@ interface RegisterForm {
   password: string;
   confirmPassword: string;
   address: string;
+  latitude: number;
+  longitude: number
 }
 
 const Register = () => {
@@ -19,7 +21,9 @@ const Register = () => {
     username: '',
     password: '',
     confirmPassword: '',
-    address: ''
+    address: '',
+    latitude: 0,
+    longitude: 0
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -58,7 +62,15 @@ const Register = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_AUTH}api/auth/register`, {
+      const LatLong = await getLatLong(formData.address);
+      if(LatLong){
+        const{lat, lng}= LatLong;
+        formData.latitude = lat as number;
+        formData.longitude = lng as number;
+        console.log(formData)
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_AUTH}auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +79,9 @@ const Register = () => {
           email: formData.email,
           username: formData.username,
           password: formData.password,
-          address: formData.address
+          address: formData.address,
+          latitude: formData.latitude,
+          longitude: formData.longitude
         }),
         signal: controller.signal
       });
@@ -91,6 +105,32 @@ const Register = () => {
       setIsLoading(false);
     }
   };
+
+  async function getLatLong(address: string) {
+    const apiKey = process.env.NEXT_PUBLIC_HERE_API_KEY;
+    try {
+      const response = await fetch(
+        `https://geocode.search.hereapi.com/v1/geocode?q=${encodeURIComponent(
+          address 
+        )}&in=countryCode:IDN&limit=1&apiKey=${apiKey}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (data.items && data.items.length > 0) {
+        const { lat, lng } = data.items[0].position;
+        return { lat, lng };
+      } else {
+        throw new Error("No location data found.");
+      }
+    } catch (error) {
+      console.error("Error fetching location data:", error);
+    }
+  }
 
   return (
     <div className="w-full h-screen bg-cover bg-center bg-[url('/img/background.jpg')]">

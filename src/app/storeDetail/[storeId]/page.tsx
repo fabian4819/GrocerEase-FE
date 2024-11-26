@@ -9,9 +9,8 @@ import Navbar from "@/app/components/navbar";
 import PaginationButton from "@/app/components/paginationButton";
 import DefaultButton from "@/app/components/defaultButton";
 
-// Store and Product Types
 type Store = {
-  store_id: number;
+  store_id: string;
   store_name: string;
   image_link: string;
   location: string;
@@ -23,12 +22,12 @@ type Store = {
 };
 
 type Product = {
-  product_id: string;
+  _id: string;
   name: string;
   description?: string;
   price: number;
-  image_url?: string;
-  store_id: string;
+  image_link?: string;
+  shop_id: string;
 };
 
 type User = {
@@ -37,20 +36,22 @@ type User = {
   longitude: number;
 };
 
-// Dummy user data
 const user: User = {
   address: "User Address",
-  latitude: -7.770717, // UGM, Yogyakarta
+  latitude: -7.770717,
   longitude: 110.3695,
 };
+
+const API_URL = process.env.NEXT_PUBLIC_API_AUTH;
 
 function StoreDetailPage() {
   const params = useParams();
   const storeId = params.storeId;
 
-  // State for dummy data
-  const [dummyStores, setDummyStores] = useState<Store[]>([]);
-  const [dummyProducts, setDummyProducts] = useState<Product[]>([]);
+  const [store, setStore] = useState<Store | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<"name" | "price" | null>(null);
@@ -59,67 +60,64 @@ function StoreDetailPage() {
 
   const productsPerPage = 20;
 
-  // Dummy data generation
+  // Fetch store and products data
   useEffect(() => {
-    const getPseudoRandomOffset = (seed: number) => {
-      return ((Math.sin(seed) + 1) / 2) * 0.01 - 0.005; // Scale to (-0.005, 0.005)
+    const fetchStoreData = async () => {
+      try {
+        setIsLoading(true);
+
+        // Fetch store details
+        const storeResponse = await fetch(`${API_URL}stores/${storeId}`);
+        if (!storeResponse.ok) {
+          throw new Error('Failed to fetch store details');
+        }
+        const storeData = await storeResponse.json();
+        setStore(storeData);
+
+        // Fetch store's products
+        const productsResponse = await fetch(`${API_URL}products/store/${storeId}`);
+        if (!productsResponse.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        const productsData = await productsResponse.json();
+        setProducts(productsData);
+
+        setError(null);
+      } catch (err) {
+        setError('Error loading store data. Please try again later.');
+        console.error('Error fetching store data:', err);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    const generateDummyStores = () => {
-      const stores = Array.from({ length: 100 }, (_, i) => ({
-        store_id: i + 1,
-        store_name: `Toko ${i + 1}`,
-        image_link: `/img/background.jpg`,
-        location: `Lokasi ${i + 1}`,
-        latitude: -7.770717 + getPseudoRandomOffset(i + 1),
-        longitude: 110.3695 + getPseudoRandomOffset(100 + i + 1),
-        contact_info: `+62 812 345 67${i}`,
-        opening_hours: "9 AM - 9 PM",
-        description: `Contoh deskripsi untuk toko ke-${
-          i + 1
-        }. Cuma untuk placeholder yak.`,
-      }));
-      setDummyStores(stores);
-    };
+    if (storeId) {
+      fetchStoreData();
+    }
+  }, [storeId]);
 
-    const generateDummyProducts = () => {
-      const getPseudoRandomValue = (seed: number, range: number) => {
-        // Using sine function for pseudo-random value generation
-        return ((Math.sin(seed) + 1) / 2) * range; // Scale to range (0, range)
-      };
-
-      const products = Array.from({ length: 200 }, (_, i) => ({
-        product_id: `P${i + 1}`,
-        name: `Product ${i + 1}`,
-        description: `Description for product ${
-          i + 1
-        }. Lorem Ipsum sir dolor met amet`,
-        price: Math.round(getPseudoRandomValue(i + 1, 100000)), // Price between 0 and 100
-        image_url: `/img/background.jpg`, // Placeholder images
-        store_id: i < 100 ? "1" : "2",
-      }));
-
-      setDummyProducts(products);
-    };
-
-    generateDummyStores();
-    generateDummyProducts();
-  }, []);
-
-  const store = dummyStores.find(
-    (store) => store.store_id === parseInt((storeId as string) || "")
-  );
-
-  if (!store) {
-    return <div>Store not found</div>;
+  if (isLoading) {
+    return (
+      <div className="w-full min-h-screen bg-white font-['Dosis'] flex items-center justify-center">
+        <div className="text-2xl">Loading store details...</div>
+      </div>
+    );
   }
 
-  // Filter, sort, and paginate products
-  const filteredProducts = dummyProducts
-    .filter(
-      (product) =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        product.store_id === store.store_id.toString() // Filter by store_id
+  if (error || !store) {
+    return (
+      <div className="w-full min-h-screen bg-white font-['Dosis'] flex items-center justify-center">
+        <div className="text-2xl text-red-500">
+          {error || 'Store not found'}
+        </div>
+      </div>
+    );
+  }
+
+  // Filter and sort products
+  const filteredProducts = products
+    .filter((product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
       if (!sortBy) return 0;
@@ -131,11 +129,9 @@ function StoreDetailPage() {
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
   const startIndex = (currentPage - 1) * productsPerPage;
   const currentProducts = filteredProducts.slice(
-    startIndex,
     startIndex + productsPerPage
   );
 
-  // Pagination helper
   const getPagination = () => {
     const pages: (string | number)[] = [];
     if (currentPage > 2) pages.push(1, "...");
@@ -169,7 +165,7 @@ function StoreDetailPage() {
       Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
       Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // in meters
+    return R * c;
   };
 
   const formatDistance = (distance: number) => {
@@ -184,234 +180,155 @@ function StoreDetailPage() {
     store.longitude
   );
 
-  const doNothing = () => {};
-
   return (
     <div className="w-full min-h-screen bg-white font-['Dosis']">
       <Navbar />
-      <div style={{ maxWidth: "1200px", margin: "auto", padding: "20px" }}>
-        {/* Go to Store List Button */}
-        <div style={{ marginBottom: "20px" }}>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Back Button */}
+        <div className="mb-6">
           <Link href="/storeList">
-            <DefaultButton onClick={doNothing}>
+            <DefaultButton onClick={() => { }}>
               Kembali ke Daftar Toko
             </DefaultButton>
           </Link>
         </div>
 
-        {/* Title */}
-        <h1
-          style={{
-            textAlign: "center",
-            marginBottom: "20px",
-            color: "black",
-            fontWeight: "bold",
-            fontSize: "36px",
-          }}
-        >
+        {/* Store Header */}
+        <h1 className="text-center mb-8 text-black font-bold text-4xl">
           Detail Toko
         </h1>
+
         {/* Store Information */}
-        <div
-          className="flex items-center justify-center"
-          style={{ marginBottom: 20 }}
-        >
-          <div>
+        <div className="flex flex-col items-center mb-12">
+          <div className="w-full max-w-2xl">
             <Image
-              src={store.image_link}
+              src={store.image_link || "/img/background.jpg"}
               alt={store.store_name}
-              width={300}
-              height={300}
-              className="rounded-md mx-auto"
+              width={400}
+              height={400}
+              className="rounded-lg mx-auto mb-6"
             />
-            <div className="mt-4 text-center">
-              <h2 className="text-2xl text-black font-bold">
+            <div className="text-center space-y-3">
+              <h2 className="text-3xl font-bold text-black">
                 {store.store_name}
               </h2>
-              <p className="text-black mt-2">
+              <p className="text-lg">
                 Jarak: {formatDistance(distance)}
               </p>
-              <p className="text-black mt-2">{store.description}</p>
-              <p className="text-black mt-2">Contact: {store.contact_info}</p>
+              <p className="text-gray-700">{store.description}</p>
+              <p className="font-semibold">Contact: {store.contact_info}</p>
+              <p>Opening Hours: {store.opening_hours}</p>
+              <p>Location: {store.location}</p>
             </div>
           </div>
         </div>
 
-        <div className="mb-6 p-4 border rounded-lg shadow-md bg-gray-50 text-center">
-          {/* Search and Sort */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "20px",
-            }}
-          >
-            {/* Search Bar */}
-            <div
-              className="flex items-center mb-4"
-              style={{ position: "relative", width: "250px" }}
-            >
+        {/* Products Section */}
+        <div className="bg-gray-50 rounded-lg shadow-md p-6">
+          {/* Search and Sort Controls */}
+          <div className="flex justify-between items-center mb-8">
+            <div className="relative w-64">
               <input
                 type="text"
                 placeholder="Cari Produk"
                 value={searchTerm}
-                className="w-[415px] border-2 font-['Dosis'] text-[#1c1c1c] border-[#1c1c1c] rounded-full py-2 px-4 "
                 onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  paddingRight: "40px",
-                  border: "1px solid #ccc",
-                  outline: "none",
-                }}
+                className="w-full border-2 rounded-full py-2 px-4 pr-10"
               />
-              <span className="absolute right-4 top-2/4 -translate-y-2/4 text-gray-500">
-                <FaSearch />
-              </span>
+              <FaSearch className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
             </div>
 
-            {/* Sort Dropdown */}
-            <div
-              className="font-['Dosis']"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                color: "black",
-              }}
-            >
+            <div className="flex items-center gap-4">
               <span>Urutkan berdasarkan:</span>
               <select
-                className="bg-white border border-gray-300 rounded px-2 py-1 font-['Dosis']"
+                className="bg-white border rounded px-3 py-1"
                 value={sortBy || ""}
-                onChange={(e) => setSortBy(e.target.value as "name" | "price")}
+                onChange={(e) => setSortBy(e.target.value as "name" | "price" | null)}
               >
                 <option value="">Jangan urutkan</option>
                 <option value="name">Nama</option>
                 <option value="price">Harga</option>
               </select>
-              <button onClick={() => setIsAscending(!isAscending)}>
-                {isAscending ? (
-                  <FaSortUp className="text-xl" />
-                ) : (
-                  <FaSortDown className="text-xl" />
-                )}
+              <button
+                onClick={() => setIsAscending(!isAscending)}
+                className="text-xl"
+              >
+                {isAscending ? <FaSortUp /> : <FaSortDown />}
               </button>
             </div>
           </div>
 
-          {/* Product Grid */}
+          {/* Products Grid */}
           {currentProducts.length === 0 ? (
-            <div className="text-center text-gray-500 font-semibold font-['Dosis']">
+            <div className="text-center text-gray-500 py-8">
               Tidak ada produk yang ditemukan
             </div>
           ) : (
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {currentProducts.map((product) => (
                 <div
-                  key={product.product_id}
-                  className="border rounded-lg shadow-md p-4 flex flex-col items-center"
+                  key={product._id}
+                  className="bg-white rounded-lg shadow-md p-4 flex flex-col"
                 >
                   <Image
-                    src={store.image_link || "img/background.jpg"}
-                    alt={store.store_name}
-                    width={250}
-                    height={250}
-                    className="rounded-md"
+                    src={product.image_link || "/img/background.jpg"}
+                    alt={product.name}
+                    width={200}
+                    height={200}
+                    className="rounded-md mx-auto mb-4"
                   />
-
-                  <h2
-                    className="text-black font-semibold font-['Dosis']"
-                    style={{ fontSize: 20 }}
-                  >
-                    {product.name}
-                  </h2>
-                  <p className="text-black mb-2">
+                  <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
+                  <p className="text-lg font-bold mb-2">
                     Rp {product.price.toLocaleString()}
                   </p>
-
-                  <div className="w-full text-left">
-                    <p className="text-sm text-black">{product.description}</p>
-                  </div>
+                  {product.description && (
+                    <p className="text-sm text-gray-600 flex-grow">
+                      {product.description}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
           )}
 
           {/* Pagination */}
-          <div className="flex justify-center mt-8">
-            <PaginationButton
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#ccc"; // Dimmed black
-                e.currentTarget.style.color = "#000"; // Keep text black
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "#fff"; // White
-                e.currentTarget.style.color = "#000"; // Keep text black
-              }}
-            >
-              &lt;
-            </PaginationButton>
-            {getPagination().map((page, index) =>
-              typeof page === "number" ? (
-                <PaginationButton
-                  key={index}
-                  onClick={() => handlePageChange(page)}
-                  onMouseEnter={(e) => {
-                    if (currentPage !== page) {
-                      e.currentTarget.style.backgroundColor = "#ccc"; // Dimmed black
-                      e.currentTarget.style.color = "#000"; // Keep text black
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (currentPage !== page) {
-                      e.currentTarget.style.backgroundColor = "#fff"; // White
-                      e.currentTarget.style.color = "#000"; // Keep text black
-                    }
-                  }}
-                  customStyle={{
-                    backgroundColor: currentPage === page ? "#000" : "#fff",
-                    color: currentPage === page ? "#fff" : "#000",
-                  }}
-                >
-                  {page}
-                </PaginationButton>
-              ) : (
-                <span
-                  key={index}
-                  style={{
-                    margin: "0 5px",
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "50%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#888",
-                  }}
-                >
-                  {page}
-                </span>
-              )
-            )}
-            <PaginationButton
-              onClick={() => handlePageChange(currentPage + 1)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#ccc"; // Dimmed black
-                e.currentTarget.style.color = "#000"; // Keep text black
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "#fff"; // White
-                e.currentTarget.style.color = "#000"; // Keep text black
-              }}
-              disabled={currentPage === totalPages}
-            >
-              &gt;
-            </PaginationButton>
-          </div>
+          {filteredProducts.length > productsPerPage && (
+            <div className="flex justify-center mt-8">
+              <PaginationButton
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                &lt;
+              </PaginationButton>
+              {getPagination().map((page, index) =>
+                typeof page === "number" ? (
+                  <PaginationButton
+                    key={index}
+                    onClick={() => handlePageChange(page)}
+                    customStyle={{
+                      backgroundColor: currentPage === page ? "#000" : "#fff",
+                      color: currentPage === page ? "#fff" : "#000",
+                    }}
+                  >
+                    {page}
+                  </PaginationButton>
+                ) : (
+                  <span
+                    key={index}
+                    className="mx-2 w-10 h-10 rounded-full flex items-center justify-center text-gray-500"
+                  >
+                    {page}
+                  </span>
+                )
+              )}
+              <PaginationButton
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                &gt;
+              </PaginationButton>
+            </div>
+          )}
         </div>
       </div>
     </div>

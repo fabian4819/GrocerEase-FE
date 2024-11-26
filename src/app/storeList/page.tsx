@@ -7,10 +7,10 @@ import Link from "next/link";
 import Navbar from "../components/navbar";
 import DefaultButton from "../components/defaultButton";
 import PaginationButton from "../components/paginationButton";
+import { api } from '@/utils/api';
 
-//Change store_id type if it's not number
 type Store = {
-  store_id: number;
+  store_id: string;
   store_name: string;
   image_link: string;
   location: string;
@@ -29,50 +29,42 @@ type User = {
 
 const user: User = {
   address: "User Address",
-  latitude: -7.770717, // UGM, Yogyakarta
+  latitude: -7.770717,
   longitude: 110.3695,
 };
 
-const StoreList: React.FC = () => {
+const StoreList = () => {
+  const [stores, setStores] = useState<Store[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-
-  //Dummy Stores
-  const [dummyStores, setDummyStores] = useState<Store[]>([]);
-
-  useEffect(() => {
-    const getPseudoRandomOffset = (seed: number) => {
-      return ((Math.sin(seed) + 1) / 2) * 0.01 - 0.005; // Scale to (-0.005, 0.005)
-    };
-
-    const generateDummyStores = () => {
-      const stores = Array.from({ length: 100 }, (_, i) => ({
-        store_id: i + 1,
-        store_name: `Toko ${i + 1}`,
-        image_link: `/img/background.jpg`,
-        location: `Lokasi ${i + 1}`,
-        latitude: -7.770717 + getPseudoRandomOffset(i + 1),
-        longitude: 110.3695 + getPseudoRandomOffset(100 + i + 1),
-        contact_info: `+62 812 345 67${i}`,
-        opening_hours: "9 AM - 9 PM",
-        description: `Contoh deskripsi untuk toko ke-${
-          i + 1
-        }. Cuma untuk placeholder yak.`,
-      }));
-      setDummyStores(stores);
-    };
-
-    generateDummyStores();
-  }, []);
-
-  //TODO: Fitur Search untuk mencari nama toko
   const [searchTerm, setSearchTerm] = useState("");
   const [isAscending, setIsAscending] = useState(true);
   const [sortBy, setSortBy] = useState<string>("nosort");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const storesPerPage = 10;
+  const API_URL = process.env.NEXT_PUBLIC_API_AUTH || 'http://localhost:5000/';
 
-  // TODO: Fitur Sort mungkin by name atau by Jarak. //
-  const filteredStores = dummyStores
+  // Fetch stores from API
+  useEffect(() => {
+    const fetchStores = async () => {
+      try {
+        setIsLoading(true);
+        const data = await api.stores.getAll()
+        setStores(data);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An unknown error occurred');
+        setStores([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStores();
+  }, []);
+
+  const filteredStores = stores
     .filter((store) =>
       store.store_name.toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -97,17 +89,40 @@ const StoreList: React.FC = () => {
         comparison = distanceA - distanceB;
       }
 
-      // If isAscending is false, reverse the order
       return isAscending ? comparison : -comparison;
     });
 
-  // Algoritma untuk atur page
   const totalPages = Math.ceil(filteredStores.length / storesPerPage);
   const startIndex = (currentPage - 1) * storesPerPage;
   const currentStores = filteredStores.slice(
     startIndex,
     startIndex + storesPerPage
   );
+
+  function haversineDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ) {
+    const R = 6378137;
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  function formatDistance(distance: number) {
+    return distance < 1000
+      ? `${Math.round(distance)} m`
+      : `${(distance / 1000).toFixed(2)} km`;
+  }
 
   const getPagination = () => {
     const pages: (string | number)[] = [];
@@ -119,297 +134,167 @@ const StoreList: React.FC = () => {
     return pages;
   };
 
-  function haversineDistance(
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ) {
-    const R = 6378137; // Earth's radius in meters
-
-    const φ1 = (lat1 * Math.PI) / 180; // φ, λ in radians
-    const φ2 = (lat2 * Math.PI) / 180;
-    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
-    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
-
-    const a =
-      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-    const distance = R * c; // in meters
-
-    return distance;
-  }
-
-  function formatDistance(distance: number) {
-    if (distance < 1000) {
-      return `${Math.round(distance)} m`; // Display in meters if less than 1 km
-    } else {
-      return `${(distance / 1000).toFixed(2)} km`; // Display in kilometers
-    }
-  }
-
-  // Handle page change
   const handlePageChange = (page: number | string) => {
     if (typeof page === "number" && page > 0 && page <= totalPages) {
       setCurrentPage(page);
     }
   };
 
-  const handleSortOrderToggle = () => {
-    setIsAscending(!isAscending);
-  };
-
-  const doNothing = () => {};
-
   return (
     <div className="w-full min-h-screen bg-white font-['Dosis']">
       <Navbar />
       <div style={{ maxWidth: "1200px", margin: "auto", padding: "20px" }}>
-        {/* Title */}
-        <h1
-          style={{
-            textAlign: "center",
-            marginBottom: "20px",
-            color: "black",
-            fontWeight: "bold",
-            fontSize: "36px",
-          }}
-        >
+        <h1 className="text-center mb-8 text-black font-bold text-4xl">
           Daftar Toko
         </h1>
 
-        {/* TODO : Search and Filter */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "20px",
-          }}
-        >
-          {/* Search Bar */}
-          <div
-            className="flex items-center mb-4"
-            style={{ position: "relative", width: "250px" }}
-          >
-            <input
-              type="text"
-              placeholder="Cari Toko"
-              value={searchTerm}
-              className="w-[415px] border-2 font-['Dosis'] text-[#1c1c1c] border-[#1c1c1c] rounded-full py-2 px-4 "
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "10px",
-                paddingRight: "30px",
-                border: "1px solid #ccc",
-                outline: "none",
-              }}
-            />
-            <span
-              style={{
-                position: "absolute",
-                right: "10px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                cursor: "pointer",
-              }}
+        {error ? (
+          <div className="text-center p-4 mb-4 bg-red-100 text-red-700 rounded">
+            {error}
+            <button
+              onClick={() => window.location.reload()}
+              className="ml-4 underline"
             >
-              <FaSearch style={{ color: "black" }} />
-            </span>
-          </div>
-
-          {/* Filter Dropdown */}
-          <div
-            className="font-['Dosis']"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              color: "black",
-            }}
-          >
-            <span>Urutkan berdasarkan:</span>
-            <select
-              className="bg-white border border-gray-300 rounded px-2 py-1 font-['Dosis']"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-            >
-              <option value="nosort">Jangan Urutkan</option>
-              <option value="name">Nama</option>
-              <option value="location">Lokasi</option>
-            </select>
-            <button onClick={handleSortOrderToggle}>
-              {isAscending ? (
-                <FaSortUp className="text-[#1d1d21] text-xl" />
-              ) : (
-                <FaSortDown className="text-[#1d1d21] text-xl" />
-              )}
+              Try Again
             </button>
           </div>
-        </div>
-
-        {/* List Store */}
-        {currentStores.map((store) => {
-          const distance = haversineDistance(
-            user.latitude,
-            user.longitude,
-            store.latitude,
-            store.longitude
-          );
-
-          return (
-            <div
-              key={store.store_id}
-              style={{
-                border: "1px solid #ccc",
-                borderRadius: "10px",
-                padding: "20px",
-                marginBottom: "20px",
-                display: "flex",
-              }}
-            >
-              <div>
-                <Image
-                  src={store.image_link}
-                  alt={store.store_name}
-                  width={150}
-                  height={150}
-                  style={{
-                    borderRadius: "8px",
-                    marginTop: "15px",
-                    marginRight: "20px",
-                  }}
+        ) : isLoading ? (
+          <div className="text-center p-4">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            <p className="mt-2">Loading stores...</p>
+          </div>
+        ) : stores.length === 0 ? (
+          <div className="text-center p-4">
+            No stores found
+          </div>
+        ) : (
+          <>
+            <div className="flex justify-between items-center mb-8">
+              <div className="relative w-[250px]">
+                <input
+                  type="text"
+                  placeholder="Cari Toko"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full border-2 font-['Dosis'] text-[#1c1c1c] border-[#1c1c1c] rounded-full py-2 px-4"
                 />
+                <span className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                  <FaSearch style={{ color: "black" }} />
+                </span>
               </div>
-              <div
-                className={"font-['Dosis']"}
-                style={{ flex: 1, color: "black" }}
-              >
-                <h2
-                  style={{
-                    margin: "0 0 10px 0",
-                    fontSize: 20,
-                    fontWeight: "bold",
-                  }}
+
+              <div className="flex items-center gap-4">
+                <span>Urutkan berdasarkan:</span>
+                <select
+                  className="bg-white border border-gray-300 rounded px-2 py-1"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
                 >
-                  {store.store_name} ({formatDistance(distance)} dari lokasi
-                  Anda)
-                </h2>
-                <p>
-                  <strong>Lokasi:</strong> {store.location}
-                </p>
-                <p>
-                  <strong>Info Kontak:</strong> {store.contact_info}
-                </p>
-                <p>
-                  <strong>Jam Buka:</strong> {store.opening_hours}
-                </p>
-                <p>{store.description}</p>
-              </div>
-              <div>
-                <Link href={`/storeDetail/${store.store_id}`}>
-                  <DefaultButton onClick={doNothing}>
-                    View Details
-                  </DefaultButton>
-                </Link>
+                  <option value="nosort">Jangan Urutkan</option>
+                  <option value="name">Nama</option>
+                  <option value="location">Lokasi</option>
+                </select>
+                <button onClick={() => setIsAscending(!isAscending)}>
+                  {isAscending ? (
+                    <FaSortUp className="text-[#1d1d21] text-xl" />
+                  ) : (
+                    <FaSortDown className="text-[#1d1d21] text-xl" />
+                  )}
+                </button>
               </div>
             </div>
-          );
-        })}
 
-        {/* Pagination */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            margin: "20px 0",
-          }}
-        >
-          <PaginationButton
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#ccc"; // Dimmed black
-              e.currentTarget.style.color = "#000"; // Keep text black
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#fff"; // White
-              e.currentTarget.style.color = "#000"; // Keep text black
-            }}
-          >
-            &lt;
-          </PaginationButton>
-          {getPagination().map((page, index) =>
-            typeof page === "number" ? (
+            {currentStores.map((store) => {
+              const distance = haversineDistance(
+                user.latitude,
+                user.longitude,
+                store.latitude,
+                store.longitude
+              );
+
+              return (
+                <div
+                  key={store.store_id}
+                  className="border rounded-lg p-6 mb-6 flex items-start"
+                >
+                  <div className="flex-shrink-0">
+                    <Image
+                      src={store.image_link || "/img/background.jpg"}
+                      alt={store.store_name}
+                      width={150}
+                      height={150}
+                      className="rounded-lg"
+                    />
+                  </div>
+                  <div className="flex-grow px-6">
+                    <h2 className="text-xl font-bold mb-2">
+                      {store.store_name} ({formatDistance(distance)} dari lokasi Anda)
+                    </h2>
+                    <p><strong>Lokasi:</strong> {store.location}</p>
+                    <p><strong>Info Kontak:</strong> {store.contact_info}</p>
+                    <p><strong>Jam Buka:</strong> {store.opening_hours}</p>
+                    <p>{store.description}</p>
+                  </div>
+                  <div>
+                    <Link href={`/storeDetail/${store.store_id}`}>
+                      <DefaultButton onClick={() => {}}>
+                        View Details
+                      </DefaultButton>
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+
+            <div className="flex justify-center mt-8">
               <PaginationButton
-                key={index}
-                onClick={() => handlePageChange(page)}
-                onMouseEnter={(e) => {
-                  if (currentPage !== page) {
-                    e.currentTarget.style.backgroundColor = "#ccc"; // Dimmed black
-                    e.currentTarget.style.color = "#000"; // Keep text black
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (currentPage !== page) {
-                    e.currentTarget.style.backgroundColor = "#fff"; // White
-                    e.currentTarget.style.color = "#000"; // Keep text black
-                  }
-                }}
-                customStyle={{
-                  backgroundColor: currentPage === page ? "#000" : "#fff",
-                  color: currentPage === page ? "#fff" : "#000",
-                }}
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
               >
-                {page}
+                &lt;
               </PaginationButton>
-            ) : (
-              <span
-                key={index}
-                style={{
-                  margin: "0 5px",
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#888",
-                }}
+              {getPagination().map((page, index) =>
+                typeof page === "number" ? (
+                  <PaginationButton
+                    key={index}
+                    onClick={() => handlePageChange(page)}
+                    customStyle={{
+                      backgroundColor: currentPage === page ? "#000" : "#fff",
+                      color: currentPage === page ? "#fff" : "#000",
+                    }}
+                  >
+                    {page}
+                  </PaginationButton>
+                ) : (
+                  <span
+                    key={index}
+                    className="mx-2 w-10 h-10 rounded-full flex items-center justify-center text-gray-500"
+                  >
+                    {page}
+                  </span>
+                )
+              )}
+              <PaginationButton
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
               >
-                {page}
-              </span>
-            )
-          )}
-          <PaginationButton
-            onClick={() => handlePageChange(currentPage + 1)}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#ccc"; // Dimmed black
-              e.currentTarget.style.color = "#000"; // Keep text black
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#fff"; // White
-              e.currentTarget.style.color = "#000"; // Keep text black
-            }}
-            disabled={currentPage === totalPages}
-          >
-            &gt;
-          </PaginationButton>
-        </div>
+                &gt;
+              </PaginationButton>
+            </div>
+          </>
+        )}
 
-        {/* Tombol button di bawah */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: "20px",
-          }}
-        >
-          <DefaultButton onClick={doNothing}>Tambah Toko Anda</DefaultButton>
-          <DefaultButton onClick={doNothing}>Lihat Toko Anda</DefaultButton>
+        <div className="flex justify-center gap-4 mt-8">
+          <Link href="/store/create">
+            <DefaultButton onClick={() => {}}>
+              Tambah Toko Anda
+            </DefaultButton>
+          </Link>
+          <Link href="/store/my-stores">
+            <DefaultButton onClick={() => {}}>
+              Lihat Toko Anda
+            </DefaultButton>
+          </Link>
         </div>
       </div>
     </div>
