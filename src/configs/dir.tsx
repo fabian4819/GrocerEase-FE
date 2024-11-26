@@ -4,6 +4,7 @@ const login = "/login";
 const signup = "/signup";
 const itemDetail = "/item-detail";
 const landing = "/";
+const productList = "/product-list";
 const shoppingList = "/shopping-list";
 const storeDetail = "/store-detail/:storeId";
 const storeList = "/store-list";
@@ -16,6 +17,7 @@ export const links = {
   signup,
   itemDetail,
   landing,
+  productList,
   shoppingList,
   storeDetail,
   storeList,
