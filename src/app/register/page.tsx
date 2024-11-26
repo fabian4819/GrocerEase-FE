@@ -1,18 +1,24 @@
-"use client"
+'use client';
 import React, { useState } from "react";
 import { useRouter } from 'next/navigation';
-import LoginButton from '../components/loginButton';
+import RegisterButton from "../components/registerButton";
 
-interface LoginForm {
+interface RegisterForm {
   email: string;
+  username: string;
   password: string;
+  confirmPassword: string;
+  address: string;
 }
 
-const Login = () => {
+const Register = () => {
   const router = useRouter();
-  const [formData, setFormData] = useState<LoginForm>({
+  const [formData, setFormData] = useState<RegisterForm>({
     email: '',
-    password: ''
+    username: '',
+    password: '',
+    confirmPassword: '',
+    address: ''
   });
   const [error, setError] = useState('');
 
@@ -25,23 +31,36 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_AUTH}api/auth/login`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_AUTH}api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          email: formData.email,
+          username: formData.username,
+          password: formData.password,
+          address: formData.address
+        }),
       });
+
       const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
+        throw new Error(data.message || 'Registration failed');
       }
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      router.push('/dashboard');
+
+      // After successful registration, redirect to login
+      router.push('/login');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      setError(err instanceof Error ? err.message : 'Registration failed');
     }
   };
 
@@ -51,7 +70,7 @@ const Login = () => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="relative w-[90%] max-w-[426px] bg-neutral-100 p-6 rounded-lg shadow-lg">
           <h1 className="text-center mb-6 text-[#22577a] text-[49.77px] font-semibold font-['Dosis']">
-            Masuk ke Dashboard
+            Daftar Akun
           </h1>
           {error && (
             <div className="text-red-500 text-center mb-4">{error}</div>
@@ -70,11 +89,44 @@ const Login = () => {
             </div>
             <div className="w-[80%] mx-auto mb-6">
               <input
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                placeholder="Username"
+                className="w-full h-12 bg-neutral-100 border-b border-[#393a41] pl-[14px] text-[#747680] text-2xl font-light font-['Dosis'] focus:outline-none"
+                required
+              />
+            </div>
+            <div className="w-[80%] mx-auto mb-6">
+              <input
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="password"
+                placeholder="Password"
+                className="w-full h-12 bg-neutral-100 border-b border-[#393a41] pl-[14px] text-[#747680] text-2xl font-light font-['Dosis'] focus:outline-none"
+                required
+              />
+            </div>
+            <div className="w-[80%] mx-auto mb-6">
+              <input
+                type="password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Confirm Password"
+                className="w-full h-12 bg-neutral-100 border-b border-[#393a41] pl-[14px] text-[#747680] text-2xl font-light font-['Dosis'] focus:outline-none"
+                required
+              />
+            </div>
+            <div className="w-[80%] mx-auto mb-6">
+              <input
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="Address"
                 className="w-full h-12 bg-neutral-100 border-b border-[#393a41] pl-[14px] text-[#747680] text-2xl font-light font-['Dosis'] focus:outline-none"
                 required
               />
@@ -84,8 +136,19 @@ const Login = () => {
                 type="submit"
                 className="w-full"
               >
-                <LoginButton />
+                <RegisterButton />
               </button>
+            </div>
+            <div className="w-[80%] mx-auto mt-4 text-center">
+              <p className="text-[#747680]">
+                Already have an account?{' '}
+                <span
+                  className="text-[#22577a] cursor-pointer"
+                  onClick={() => router.push('/login')}
+                >
+                  Login here
+                </span>
+              </p>
             </div>
           </form>
         </div>
@@ -94,4 +157,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;
