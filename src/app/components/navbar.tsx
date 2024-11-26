@@ -1,3 +1,4 @@
+"use client";
 import { HiShoppingCart } from 'react-icons/hi';
 import { FaUserEdit, FaSignOutAlt } from 'react-icons/fa';
 import Link from 'next/link';
