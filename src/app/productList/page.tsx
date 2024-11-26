@@ -39,11 +39,6 @@ type User = {
   longitude: number;
 };
 
-const user: User = {
-  latitude: -7.770717,
-  longitude: 110.3695,
-};
-
 const API_URL = process.env.NEXT_PUBLIC_API_AUTH;
 
 function ProductListPage() {
@@ -55,6 +50,7 @@ function ProductListPage() {
   const [sortBy, setSortBy] = useState<"name" | "price" | "location" | null>(
     null
   );
+  const [user, setUserLocation] = useState<User>({ latitude: 0, longitude: 0 });
   const [isAscending, setIsAscending] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -62,6 +58,14 @@ function ProductListPage() {
 
   // Fetch products data
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      setUserLocation(() => ({
+        latitude: user.latitude || 0.0,
+        longitude: user.longitude || 0.0,
+      }));
+    }
+
     const fetchProducts = async () => {
       try {
         setIsLoading(true);
@@ -241,7 +245,7 @@ function ProductListPage() {
           <div className="mb-6">
             <Link href="/storeList">
               <DefaultButton onClick={() => {}}>
-                Kembali ke Daashboard
+                Kembali ke Dashboard
               </DefaultButton>
             </Link>
           </div>
