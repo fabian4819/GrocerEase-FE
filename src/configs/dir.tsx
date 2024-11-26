@@ -7,6 +7,7 @@ const landing = "/";
 const shoppingList = "/shopping-list";
 const storeDetail = "/store-detail/:storeId";
 const storeList = "/store-list";
+const editProfile = "/edit-profile";
 
 export const links = {
   analytics,
@@ -18,4 +19,5 @@ export const links = {
   shoppingList,
   storeDetail,
   storeList,
+  editProfile
 };

@@ -12,6 +12,9 @@ const Navbar = () => {
                 <Link href="/login" className="absolute right-[40px] top-[15px] text-white text-2xl mr-6 font-medium hover:text-gray-300">
                     Keluar
                 </Link>
+                <Link href="/editProfile" className="absolute right-[130px] top-[15px] text-white text-2xl mr-6 font-medium hover:text-gray-300">
+                    Edit Profile
+                </Link>
             </div>
         </nav>
     )
