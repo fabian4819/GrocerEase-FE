@@ -79,5 +79,9 @@ Made by:
 - 22/496725/TK/54440 Wulan Tiarahayu
 - 22/496507/TK/54405 Fidelya Fredelina
 
-## Aditional Link
-- Presentation: 
+## Aditional Links
+- Presentation (Video): https://youtu.be/7zoDM_9DnuY
+- Presentation (File) : https://docs.google.com/presentation/d/14Zl_DLHmumO0FdT4bG2qJpS0hMucqYjWjXPvdmiIUy8/edit?usp=sharing
+- UI/UX design: https://www.figma.com/design/3uGeXl32DVmENm3WX3rTwc/GrocerEase?node-id=0-1&t=UY9tSAwFXKMO3aOP-1
+- Backend Repo: https://github.com/fabian4819/GrocerEase-BE
+- Deployed at: https://grocer-ease-fe.vercel.app/
