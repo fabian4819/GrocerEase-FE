@@ -83,6 +83,6 @@ Made by:
 - Presentation (Video): https://youtu.be/7zoDM_9DnuY
 - Presentation (File) : https://docs.google.com/presentation/d/14Zl_DLHmumO0FdT4bG2qJpS0hMucqYjWjXPvdmiIUy8/edit?usp=sharing
 - UI/UX design: https://www.figma.com/design/3uGeXl32DVmENm3WX3rTwc/GrocerEase?node-id=0-1&t=UY9tSAwFXKMO3aOP-1
-- Backend Repo: https://github.com/fabian4819/GrocerEase-FE
+- Backend Repo: https://github.com/fabian4819/GrocerEase-BE
 
 Deployed website is available at the about section
