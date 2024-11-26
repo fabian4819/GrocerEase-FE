@@ -58,7 +58,7 @@ const Dashboard = () => {
               Kamu orang hemat yang lagi berburu harga sembako murah?
               Kelola belanjaanmu di sini! Bisa bandingin harga dari berbagai toko yang tersedia.
             </p>
-            <button className="w-full bg-green-600 hover:bg-green-700 text-white text-xl font-bold py-4 px-8 rounded-lg transition-colors duration-300 transform hover:scale-105">
+            <button onClick={() => router.push('/productList')} className="w-full bg-green-600 hover:bg-green-700 text-white text-xl font-bold py-4 px-8 rounded-lg transition-colors duration-300 transform hover:scale-105">
               Daftar Item
             </button>
           </motion.div>

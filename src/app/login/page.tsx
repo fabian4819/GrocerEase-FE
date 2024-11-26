@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from "react";
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import LoginButton from '../components/loginButton';
 
 interface LoginForm {
@@ -121,6 +122,19 @@ const Login = () => {
               </button>
             </div>
           </form>
+
+          {/* Register Link Section */}
+          <div className="w-[80%] mx-auto mt-6 text-center">
+            <p className="text-[#747680] font-['Dosis']">
+              dont have any account?{' '}
+              <Link 
+                href="/register" 
+                className="text-[#22577a] font-semibold hover:text-[#1a4057] transition-colors duration-300 underline-offset-2 hover:underline"
+              >
+                Register
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
