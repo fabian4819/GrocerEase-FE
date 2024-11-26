@@ -74,10 +74,10 @@ All the files in this project are written in typescript and will be compiled whe
 
 Made by:
 - 22/496484/TK/54400 Bagas Pujangkoro
-- 22/505501/TK/55319 Habib Fabian Fahles
+- 22/505501/TK/55319 Habib Fabian Fahlesi
 - 22/492727/TK/53940 Rama Sulaiman Nurcahyo
 - 22/496725/TK/54440 Wulan Tiarahayu
 - 22/496507/TK/54405 Fidelya Fredelina
 
-## Aditional Links
+## Aditional Link
 - Presentation: 
