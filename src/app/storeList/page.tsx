@@ -140,197 +140,199 @@ const StoreList = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 font-['Dosis']">
       <Navbar />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Temukan Toko Terdekat
-          </h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Jelajahi berbagai toko di sekitar Anda dan temukan yang Anda butuhkan
-          </p>
-        </div>
-
-        {error ? (
-          <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-8 rounded-md">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-red-700">{error}</p>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="text-red-700 underline hover:text-red-800 ml-2"
-                >
-                  Coba Lagi
-                </button>
-              </div>
-            </div>
+      <div className="pt-[70px]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Temukan Toko Terdekat
+            </h1>
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+              Jelajahi berbagai toko di sekitar Anda dan temukan yang Anda butuhkan
+            </p>
           </div>
-        ) : isLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-            <p className="ml-4 text-gray-600">Memuat data toko...</p>
-          </div>
-        ) : stores.length === 0 ? (
-          <div className="text-center py-12">
-            <FaStore className="mx-auto h-12 w-12 text-gray-400" />
-            <p className="mt-4 text-gray-600">Belum ada toko yang terdaftar</p>
-          </div>
-        ) : (
-          <>
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
-              <div className="relative w-full md:w-[300px]">
-                <input
-                  type="text"
-                  placeholder="Cari Toko"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full text-black bg-white shadow-sm border border-gray-200 rounded-full py-3 px-6 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                />
-                <FaSearch className="absolute right-6 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              </div>
 
-              <div className="flex items-center gap-4">
-                <span className="text-gray-600">Urutkan:</span>
-                <select
-                  className="bg-white border text-black border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                >
-                  <option value="nosort">Standar</option>
-                  <option value="name">Nama</option>
-                  <option value="location">Jarak</option>
-                </select>
-                <button 
-                  onClick={() => setIsAscending(!isAscending)}
-                  className="p-2 hover:bg-gray-100 rounded-full transition duration-200"
-                >
-                  {isAscending ? (
-                    <FaSortUp className="text-gray-600 text-xl" />
-                  ) : (
-                    <FaSortDown className="text-gray-600 text-xl" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div className="grid gap-6">
-              {currentStores.map((store) => {
-                const distance = haversineDistance(
-                  user.latitude,
-                  user.longitude,
-                  store.latitude,
-                  store.longitude
-                );
-
-                return (
-                  <div
-                    key={store._id}
-                    className="bg-white rounded-xl shadow-sm hover:shadow-md transition duration-200 overflow-hidden border border-gray-100"
+          {error ? (
+            <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-8 rounded-md">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-red-700">{error}</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="text-red-700 underline hover:text-red-800 ml-2"
                   >
-                    <div className="flex flex-col md:flex-row">
-                      <div className="md:w-48 h-48 relative">
-                        <Image
-                          src={store.image_link || "/img/background.jpg"}
-                          alt={store.store_name}
-                          layout="fill"
-                          objectFit="cover"
-                          className="rounded-t-xl md:rounded-l-xl md:rounded-t-none"
-                        />
-                      </div>
-                      <div className="flex-grow p-6">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                              {store.store_name}
-                            </h2>
-                            <p className="text-blue-600 font-medium mb-4">
-                              {formatDistance(distance)} dari lokasi Anda
-                            </p>
-                          </div>
-                          <Link href={`/storeDetail/${store._id}`}>
-                            <DefaultButton onClick={() => {}}>
-                              Lihat Detail
-                            </DefaultButton>
-                          </Link>
+                    Coba Lagi
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : isLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+              <p className="ml-4 text-gray-600">Memuat data toko...</p>
+            </div>
+          ) : stores.length === 0 ? (
+            <div className="text-center py-12">
+              <FaStore className="mx-auto h-12 w-12 text-gray-400" />
+              <p className="mt-4 text-gray-600">Belum ada toko yang terdaftar</p>
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
+                <div className="relative w-full md:w-[300px]">
+                  <input
+                    type="text"
+                    placeholder="Cari Toko"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full text-black bg-white shadow-sm border border-gray-200 rounded-full py-3 px-6 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                  />
+                  <FaSearch className="absolute right-6 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <span className="text-gray-600">Urutkan:</span>
+                  <select
+                    className="bg-white border text-black border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                  >
+                    <option value="nosort">Standar</option>
+                    <option value="name">Nama</option>
+                    <option value="location">Jarak</option>
+                  </select>
+                  <button
+                    onClick={() => setIsAscending(!isAscending)}
+                    className="p-2 hover:bg-gray-100 rounded-full transition duration-200"
+                  >
+                    {isAscending ? (
+                      <FaSortUp className="text-gray-600 text-xl" />
+                    ) : (
+                      <FaSortDown className="text-gray-600 text-xl" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid gap-6">
+                {currentStores.map((store) => {
+                  const distance = haversineDistance(
+                    user.latitude,
+                    user.longitude,
+                    store.latitude,
+                    store.longitude
+                  );
+
+                  return (
+                    <div
+                      key={store._id}
+                      className="bg-white rounded-xl shadow-sm hover:shadow-md transition duration-200 overflow-hidden border border-gray-100"
+                    >
+                      <div className="flex flex-col md:flex-row">
+                        <div className="md:w-48 h-48 relative">
+                          <Image
+                            src={store.image_link || "/img/background.jpg"}
+                            alt={store.store_name}
+                            layout="fill"
+                            objectFit="cover"
+                            className="rounded-t-xl md:rounded-l-xl md:rounded-t-none"
+                          />
                         </div>
-                        
-                        <div className="grid md:grid-cols-2 gap-4 text-gray-600">
-                          <div className="flex items-center">
-                            <FaMapMarkerAlt className="text-gray-400 mr-2" />
-                            <span>{store.location}</span>
+                        <div className="flex-grow p-6">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                                {store.store_name}
+                              </h2>
+                              <p className="text-blue-600 font-medium mb-4">
+                                {formatDistance(distance)} dari lokasi Anda
+                              </p>
+                            </div>
+                            <Link href={`/storeDetail/${store._id}`}>
+                              <DefaultButton onClick={() => { }}>
+                                Lihat Detail
+                              </DefaultButton>
+                            </Link>
                           </div>
-                          <div className="flex items-center">
-                            <FaPhoneAlt className="text-gray-400 mr-2" />
-                            <span>{store.contact_info}</span>
+
+                          <div className="grid md:grid-cols-2 gap-4 text-gray-600">
+                            <div className="flex items-center">
+                              <FaMapMarkerAlt className="text-gray-400 mr-2" />
+                              <span>{store.location}</span>
+                            </div>
+                            <div className="flex items-center">
+                              <FaPhoneAlt className="text-gray-400 mr-2" />
+                              <span>{store.contact_info}</span>
+                            </div>
+                            <div className="flex items-center">
+                              <FaClock className="text-gray-400 mr-2" />
+                              <span>{store.opening_hours}</span>
+                            </div>
                           </div>
-                          <div className="flex items-center">
-                            <FaClock className="text-gray-400 mr-2" />
-                            <span>{store.opening_hours}</span>
-                          </div>
+
+                          <p className="mt-4 text-gray-600 line-clamp-2">
+                            {store.description}
+                          </p>
                         </div>
-                        
-                        <p className="mt-4 text-gray-600 line-clamp-2">
-                          {store.description}
-                        </p>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
 
-            <div className="flex justify-center mt-8 gap-2">
-              <PaginationButton
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                &lt;
-              </PaginationButton>
-              
-              {getPagination().map((page, index) =>
-                typeof page === "number" ? (
-                  <PaginationButton
-                    key={index}
-                    onClick={() => handlePageChange(page)}
-                  >
-                    {page}
-                  </PaginationButton>
-                ) : (
-                  <span
-                    key={index}
-                    className="px-4 py-2 text-gray-400"
-                  >
-                    {page}
-                  </span>
-                )
-              )}
-              
-              <PaginationButton
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                &gt;
-              </PaginationButton>
-            </div>
+              <div className="flex justify-center mt-8 gap-2">
+                <PaginationButton
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  &lt;
+                </PaginationButton>
 
-            <div className="flex justify-center gap-4 mt-12">
-              <Link href="/addStore">
-                <DefaultButton onClick={() => {}}>
-                  Tambah Toko Anda
-                </DefaultButton>
-              </Link>
-              <Link href="/store/my-stores">
-                <DefaultButton onClick={() => {}}>
-                  Lihat Toko Anda
-                </DefaultButton>
-              </Link>
-            </div>
-          </>
-        )}
+                {getPagination().map((page, index) =>
+                  typeof page === "number" ? (
+                    <PaginationButton
+                      key={index}
+                      onClick={() => handlePageChange(page)}
+                    >
+                      {page}
+                    </PaginationButton>
+                  ) : (
+                    <span
+                      key={index}
+                      className="px-4 py-2 text-gray-400"
+                    >
+                      {page}
+                    </span>
+                  )
+                )}
+
+                <PaginationButton
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  &gt;
+                </PaginationButton>
+              </div>
+
+              <div className="flex justify-center gap-4 mt-12">
+                <Link href="/addStore">
+                  <DefaultButton onClick={() => { }}>
+                    Tambah Toko Anda
+                  </DefaultButton>
+                </Link>
+                <Link href="/store/my-stores">
+                  <DefaultButton onClick={() => { }}>
+                    Lihat Toko Anda
+                  </DefaultButton>
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
