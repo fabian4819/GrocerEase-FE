@@ -80,4 +80,4 @@ Made by:
 - 22/496507/TK/54405 Fidelya Fredelina
 
 ## Aditional Link
-- Presentation: 
+- Presentation: https://youtu.be/7zoDM_9DnuY
