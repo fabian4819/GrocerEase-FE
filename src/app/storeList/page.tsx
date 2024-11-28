@@ -1,12 +1,20 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { FaSearch, FaSortUp, FaSortDown, FaMapMarkerAlt, FaPhoneAlt, FaClock, FaStore } from "react-icons/fa";
+import {
+  FaSearch,
+  FaSortUp,
+  FaSortDown,
+  FaMapMarkerAlt,
+  FaPhoneAlt,
+  FaClock,
+  FaStore,
+} from "react-icons/fa";
 import Link from "next/link";
 import Navbar from "../components/navbar";
 import DefaultButton from "../components/defaultButton";
 import PaginationButton from "../components/paginationButton";
-import { api } from '@/utils/api';
+import { api } from "@/utils/api";
 
 type Store = {
   _id: string;
@@ -21,21 +29,15 @@ type Store = {
 };
 
 type User = {
-  address: string;
   latitude: number;
   longitude: number;
-};
-
-const user: User = {
-  address: "User Address",
-  latitude: -7.770717,
-  longitude: 110.3695,
 };
 
 const StoreList = () => {
   const [stores, setStores] = useState<Store[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [user, setUserLocation] = useState<User>({ latitude: 0, longitude: 0 });
   const [isAscending, setIsAscending] = useState(true);
   const [sortBy, setSortBy] = useState<string>("nosort");
   const [isLoading, setIsLoading] = useState(true);
@@ -44,6 +46,14 @@ const StoreList = () => {
   const storesPerPage = 10;
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      setUserLocation(() => ({
+        latitude: user.latitude || 0.0,
+        longitude: user.longitude || 0.0,
+      }));
+    }
+
     const fetchStores = async () => {
       try {
         setIsLoading(true);
@@ -51,7 +61,9 @@ const StoreList = () => {
         setStores(data);
         setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An unknown error occurred');
+        setError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
         setStores([]);
       } finally {
         setIsLoading(false);
@@ -147,7 +159,8 @@ const StoreList = () => {
               Temukan Toko Terdekat
             </h1>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              Jelajahi berbagai toko di sekitar Anda dan temukan yang Anda butuhkan
+              Jelajahi berbagai toko di sekitar Anda dan temukan yang Anda
+              butuhkan
             </p>
           </div>
 
@@ -155,8 +168,16 @@ const StoreList = () => {
             <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-8 rounded-md">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  <svg
+                    className="h-5 w-5 text-red-400"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 </div>
                 <div className="ml-3">
@@ -178,7 +199,9 @@ const StoreList = () => {
           ) : stores.length === 0 ? (
             <div className="text-center py-12">
               <FaStore className="mx-auto h-12 w-12 text-gray-400" />
-              <p className="mt-4 text-gray-600">Belum ada toko yang terdaftar</p>
+              <p className="mt-4 text-gray-600">
+                Belum ada toko yang terdaftar
+              </p>
             </div>
           ) : (
             <>
@@ -253,7 +276,7 @@ const StoreList = () => {
                               </p>
                             </div>
                             <Link href={`/storeDetail/${store._id}`}>
-                              <DefaultButton onClick={() => { }}>
+                              <DefaultButton onClick={() => {}}>
                                 Lihat Detail
                               </DefaultButton>
                             </Link>
@@ -301,10 +324,7 @@ const StoreList = () => {
                       {page}
                     </PaginationButton>
                   ) : (
-                    <span
-                      key={index}
-                      className="px-4 py-2 text-gray-400"
-                    >
+                    <span key={index} className="px-4 py-2 text-gray-400">
                       {page}
                     </span>
                   )
@@ -320,7 +340,7 @@ const StoreList = () => {
 
               <div className="flex justify-center gap-4 mt-12">
                 <Link href="/addStore">
-                  <DefaultButton onClick={() => { }}>
+                  <DefaultButton onClick={() => {}}>
                     Tambah Toko Anda
                   </DefaultButton>
                 </Link>
